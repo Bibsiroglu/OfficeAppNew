@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load tz %}
+{% now "Y-m-d" as bugun_tarih %}
+
+{% block title %}Tüm İlanların Listesi{% endblock title %}
+
+{% block content %}
+
+{% with toplam_ilan_sayisi=bugun_kalkan_ilanlar.count|add:diger_ilanlar.count|add:yarin_kalkan_ilanlar.count %}
+<h2 class="mb-4">Emlak İlanları (Toplam {{ toplam_ilan_sayisi }} İlan)</h2>
+{% endwith %}
+
+{# ========================================================================= #}
+{# UYARI KARTLARI BLOKU (LISTENIN DIŞINA TAŞINDI) #}
+{# ========================================================================= #}
+<div class="row">
+
+    {# YARIN KALKACAK İLANLAR UYARISI #}
+    {% if yarin_kalkan_ilanlar %}
+    <div class="col-md-6 mb-3">
+        <div class="card text-white bg-warning shadow border-warning">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-clock"></i>
+                    🟡 YARIN YAYINDAN KALKIYOR ({{ yarin_kalkan_ilanlar.count }} İlan)
+                </h5>
+                <p class="card-text">Aşağıdaki {{ yarin_kalkan_ilanlar.count }} ilan yarın yayından
+                    kaldırılacaktır.</p>
+                <ul class="list-unstyled">
+                    {% for ilan in yarin_kalkan_ilanlar %}
+                    <li>
+                        <a href="{% url 'ilan_detay' pk=ilan.pk %}" class="text-white">
+                            #{{ ilan.ilan_no }} - {{ ilan.baslik|truncatechars:30 }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# BUGÜN KALKACAK İLANLAR UYARISI #}
+    {% if bugun_kalkan_ilanlar %}
+    <div class="col-md-6 mb-3">
+        <div class="card text-white bg-danger shadow border-danger">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-exclamation-triangle"></i>
+                    🔴 BUGÜN YAYINDAN KALKIYOR ({{ bugun_kalkan_ilanlar.count }} İlan)
+                </h5>
+                <p class="card-text">Aşağıdaki {{ bugun_kalkan_ilanlar.count }} ilan bugün yayından
+                    kaldırılacaktır. Acil aksiyon gereklidir!</p>
+                <ul class="list-unstyled">
+                    {% for ilan in bugun_kalkan_ilanlar %}
+                    <li>
+                        <a href="{% url 'ilan_detay' pk=ilan.pk %}" class="text-white">
+                            #{{ ilan.ilan_no }} - {{ ilan.baslik|truncatechars:30 }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{# --- UYARI KARTLARI BLOKU BİTTİ --- #}
+
+<div class="list-group shadow-sm">
+    {# --- BAŞLIK SATIRI (Sabit) --- #}
+    <div class="list-group-item list-group-item-action bg-light text-muted d-none d-md-flex py-3">
+        <div class="col-md-2 fw-bold">İlan No / Kategori</div>
+        <div class="col-md-4 fw-bold">Başlık / Konum</div>
+        <div class="col-md-2 fw-bold text-center">Oda / Alan (m²)</div>
+        <div class="col-md-2 fw-bold text-center">Fiyat / Tip</div>
+        <div class="col-md-2 fw-bold text-center">Kayıt / Kalkış Tarihi</div>
+    </div>
+
+    {# ========================================================================= #}
+    {# BÖLÜM 1: BUGÜN KALKACAK İLANLARIN LİSTESİ (ÇİFT GÖSTERİMİ ÖNLEMEK İÇİN KULLANILMADI) #}
+    {# ========================================================================= #}
+
+    {# ========================================================================= #}
+    {# BÖLÜM 2: DİĞER TÜM İLANLAR (Normal Liste) #}
+    {# ========================================================================= #}
+    {% for ilan in diger_ilanlar %}
+    {% comment %} Dikkat: bugun/yarin kalkanlar diger_ilanlar'dan hariç tutulmalıdır. {% endcomment %}
+    {% include 'ilanlar/parca_ilan_satiri.html' with ilan=ilan uyari_sinifi="" %}
+    {% empty %}
+    <div class="list-group-item">
+        <p class="alert alert-info mb-0">Sistemde kayıtlı ilan bulunmamaktadır.</p>
+    </div>
+    {% endfor %}
+
+</div>
+
+{% comment %} Sayfalama (Pagination) kısmı {% endcomment %}
+{% if is_paginated %}
+<nav aria-label="Sayfalar" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Önceki</a></li>
+        {% endif %}
+
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages
+                }}</span></li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Sonraki</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock content %}

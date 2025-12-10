@@ -1,0 +1,68 @@
+<div class="bilgi-kutu">
+    <h2>👤 İlan Sahibi İletişim</h2>
+    <div class="bilgi-grid">
+        <div class="bilgi-satiri"><strong>Ad Soyad:</strong> <span>{{ ilan.musteri.ad }} {{ ilan.musteri.soyad }}</span>
+        </div>
+        <div class="bilgi-satiri"><strong>Telefon:</strong> <span>{{ ilan.musteri.telefon }}</span></div>
+    </div>
+</div>
+
+<div class="bilgi-kutu">
+    <h2>💰 Fiyat ve Durum</h2>
+    <p><strong>Fiyat:</strong> <span class="fiyat">{{ ilan.fiyat_goster }}</span></p>
+    <p><strong>Net/Brüt Oranı:</strong> {{ ilan.net_alan_orani }}</p>
+    <p><strong>Durum:</strong> {{ ilan.durum_kontrol }}</p>
+</div>
+
+<div class="bilgi-kutu">
+    <h2>📐 Fiziksel Özellikler</h2>
+    <p><strong>Oda Sayısı:</strong> {{ ilan.oda_sayisi }}</p>
+    <p><strong>İmar Durumu:</strong> {{ ilan.get_imar_durumu_display }}</p>
+    <p><strong>Mutfak Tipi:</strong> {{ ilan.get_mutfak_tipi_display }}</p>
+</div>
+
+<hr>
+
+{# BAŞLIK: Toplam Sayı Gösterimi #}
+<h2>📅 İlana Özel Randevu Geçmişi (Toplam: {{ toplam_randevu_sayisi }} Adet)</h2>
+
+{% if ilgili_randevular %}
+<div class="table-responsive">
+    <table class="table table-hover table-striped table-sm border">
+        <thead class="table-dark">
+            <tr>
+                <th>Randevu Tarihi</th>
+                <th>Müşteri Adı Soyadı</th>
+                <th>Telefon</th>
+                <th>Durum / Sonuç</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for randevu in ilgili_randevular %}
+            <tr>
+                {# 1. Randevu Tarihi #}
+                <td>{{ randevu.tarih_saat|date:"d.m.Y H:i" }}</td>
+
+                {% with pm=randevu.potansiyel_musteri %}
+                <td>{{ pm.ad }} {{ pm.soyad }}</td>
+                <td>{{ pm.telefon }}</td>
+                {% endwith %}
+
+                {# 4. Durum / Sonuç #}
+                <td>
+                    {% if randevu.durum == 'TAMAM' %}
+                    <span class="badge bg-success">{{ randevu.get_durum_display }}</span>
+                    {% elif randevu.durum == 'IPTAL' %}
+                    <span class="badge bg-danger">{{ randevu.get_durum_display }}</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">{{ randevu.get_durum_display }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="alert alert-info">Bu ilana ait henüz bir randevu planlanmamıştır.</p>
+{% endif %}

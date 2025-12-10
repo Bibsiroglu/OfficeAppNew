@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Yeni İlan Ekle{% endblock title %}
+
+{% block content %}
+<h2 class="mb-4">Yeni Emlak İlanı Kaydı</h2>
+
+<div class="card p-4 shadow-sm">
+    <form method="post">
+        {% csrf_token %} {{ form.as_p }}
+
+        <button type="submit" class="btn btn-primary mt-3">İlanı Kaydet</button>
+        <a href="{% url 'ilan_listesi' %}" class="btn btn-secondary mt-3">İptal</a>
+    </form>
+</div>
+
+{% endblock content %}
