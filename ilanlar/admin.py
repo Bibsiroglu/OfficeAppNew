@@ -27,18 +27,32 @@ class MusteriAdmin(admin.ModelAdmin):
     list_display = ('ad', 'soyad', 'telefon')
     search_fields = ('ad', 'soyad', 'telefon')
 
+@admin.register(Ilan)
 class IlanAdmin(admin.ModelAdmin):
+    
     list_display = (
-        'ilan_no', 'baslik', 'fiyat_goster', 'ana_kategori', 'il', 'mahalle', 'durum_kontrol', 'musteri' # 'musteri' alanı artık düzgün çalışmalı
+        'ilan_no', 'baslik', fiyat_goster, 'ana_kategori', 'il', 'mahalle', 
+        durum_kontrol,
+        'pasif_nedeni', # <-- Pasif nedeni listeye eklendi
+        'musteri'
     )
-    list_filter = ('ana_kategori', 'durum', 'krediye_uygun', 'tapu_durumu')
+    
+    list_filter = (
+        'ana_kategori', 'durum', 'pasif_nedeni', # <-- Pasif nedeni filtreye eklendi
+        'krediye_uygun', 'tapu_durumu'
+    )
+    
     search_fields = ('ilan_no', 'baslik', 'il', 'ilce', 'mahalle', 'site_adi')
     radio_fields = {"ana_kategori": admin.HORIZONTAL}
 
     fieldsets = [
-        ('Temel ve İlan Bilgileri', {
-            # 'musteri' alanı buraya eklendi
-            'fields': ('ilan_no', 'baslik', 'durum', 'musteri', 'ilan_tarihi', 'yayindan_kaldirilma_tarihi'), 
+        ('Temel ve Durum Bilgileri', { # Başlık GÜNCELLENDİ
+            'fields': (
+                'ilan_no', 'baslik', 
+                ('durum', 'pasif_nedeni'), # <-- Pasif nedeni forma eklendi ve durum ile gruplandı
+                'musteri', 
+                ('ilan_tarihi', 'yayindan_kaldirilma_tarihi'), 
+            ), 
         }),
         ('Kategori ve İşlem Tipi', {
             'fields': ('ana_kategori', 'detay_kategori', 'islem_tipi'),
@@ -54,6 +68,17 @@ class IlanAdmin(admin.ModelAdmin):
         }),
         ('Arazi İlanına Ait Ek Bilgiler', {'fields': ('imar_durumu', 'm2', 'm2_fiyati', 'ada_no', 'parsel_no')}),
     ]
+
+    # --- İlan Pasif ise Nedenini Zorunlu Kılan Metot ---
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        
+        # Eğer ilan düzenleniyorsa ve durumu Pasif ise
+        if obj and obj.durum == 'Pasif':
+            if 'pasif_nedeni' in form.base_fields:
+                form.base_fields['pasif_nedeni'].required = True
+        
+        return form
 @admin.register(PotansiyelMusteri)
 class PotansiyelMusteriAdmin(admin.ModelAdmin):
     list_display = ('ad', 'soyad', 'telefon', 'ilgili_ilan')
@@ -76,4 +101,3 @@ class RandevuAdmin(admin.ModelAdmin):
     # search_fields de PotansiyelMusteri'ye yönlendirilmelidir:
     search_fields = ('potansiyel_musteri__soyad', 'potansiyel_musteri__telefon')
 
-admin.site.register(Ilan, IlanAdmin)

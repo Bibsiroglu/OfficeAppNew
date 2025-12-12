@@ -105,6 +105,12 @@ DURUM_SECENEKLERI = [
     ('Pasif', 'Pasif')
 ]
 
+PASIF_NEDENLERI = [
+    ('Satildi', 'Satıldı'),
+    ('Kiralandi', 'Kiralandı'),
+    ('Kadirildi', 'Kullanıcı Tarafından Kaldırıldı'),
+]
+
 class Ilan(models.Model):
     yayindan_kaldirilma_tarihi = models.DateField(
         null=True, 
@@ -223,7 +229,13 @@ class Ilan(models.Model):
     kimden = models.CharField(max_length=50, null=True, blank=True, verbose_name="İlan Sahibi")
     takas = models.BooleanField(default=False, verbose_name="Takas")
     durum = models.CharField(max_length=20, choices=DURUM_SECENEKLERI, default='Aktif', verbose_name="Durum")
-    
+    pasif_nedeni = models.CharField(
+        max_length=50, 
+        choices=PASIF_NEDENLERI, 
+        verbose_name="Pasif Nedeni",
+        null=True,
+        blank=True,
+    )
     # Diğer Temel Alanlar (ARAZİ)
     imar_durumu = models.CharField(
         max_length=20, 
@@ -254,11 +266,14 @@ class Ilan(models.Model):
     fiyat_goster.short_description = "Fiyat"
 
     def durum_kontrol(self):
-        """İlan durumuna göre renkli ikon döndürür."""
+        """İlan durumuna göre renkli ikon ve pasif ise nedenini döndürür."""
         if self.durum == 'Aktif':
             return mark_safe('<span style="color: green; font-weight: bold;">🟢 Aktif</span>')
         elif self.durum == 'Pasif':
-            return mark_safe('<span style="color: red;">🔴 Pasif</span>')
+            neden_label = self.get_pasif_nedeni_display()
+            aciklama = f"Neden: {neden_label}" if self.pasif_nedeni else "Neden Belirtilmemiş"
+                
+            return mark_safe(f'<span style="color: red;">🔴 Pasif</span> - <small>{aciklama}</small>')
         return self.durum
     durum_kontrol.short_description = "Durum"
     
