@@ -33,12 +33,12 @@ class IlanAdmin(admin.ModelAdmin):
     list_display = (
         'ilan_no', 'baslik', fiyat_goster, 'ana_kategori', 'il', 'mahalle', 
         durum_kontrol,
-        'pasif_nedeni', # <-- Pasif nedeni listeye eklendi
+        'pasif_nedeni',
         'musteri'
     )
     
     list_filter = (
-        'ana_kategori', 'durum', 'pasif_nedeni', # <-- Pasif nedeni filtreye eklendi
+        'ana_kategori', 'durum', 'pasif_nedeni', 
         'krediye_uygun', 'tapu_durumu'
     )
     
@@ -49,7 +49,7 @@ class IlanAdmin(admin.ModelAdmin):
         ('Temel ve Durum Bilgileri', { # Başlık GÜNCELLENDİ
             'fields': (
                 'ilan_no', 'baslik', 
-                ('durum', 'pasif_nedeni'), # <-- Pasif nedeni forma eklendi ve durum ile gruplandı
+                'durum', 'pasif_nedeni', # <-- Pasif nedeni forma eklendi ve durum ile gruplandı
                 'musteri', 
                 ('ilan_tarihi', 'yayindan_kaldirilma_tarihi'), 
             ), 
@@ -79,6 +79,11 @@ class IlanAdmin(admin.ModelAdmin):
                 form.base_fields['pasif_nedeni'].required = True
         
         return form
+    
+    class Media:
+        js = (
+            'js/admin_ilan_kontrol.js', # Projenizin statik klasöründeki yol
+        )
 @admin.register(PotansiyelMusteri)
 class PotansiyelMusteriAdmin(admin.ModelAdmin):
     list_display = ('ad', 'soyad', 'telefon', 'ilgili_ilan')
