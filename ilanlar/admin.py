@@ -46,10 +46,10 @@ class IlanAdmin(admin.ModelAdmin):
     radio_fields = {"ana_kategori": admin.HORIZONTAL}
 
     fieldsets = [
-        ('Temel ve Durum Bilgileri', { # Başlık GÜNCELLENDİ
+        ('Temel ve Durum Bilgileri', {
             'fields': (
                 'ilan_no', 'baslik', 
-                'durum', 'pasif_nedeni', # <-- Pasif nedeni forma eklendi ve durum ile gruplandı
+                'durum', 'pasif_nedeni',
                 'musteri', 
                 ('ilan_tarihi', 'yayindan_kaldirilma_tarihi'), 
             ), 
@@ -69,11 +69,9 @@ class IlanAdmin(admin.ModelAdmin):
         ('Arazi İlanına Ait Ek Bilgiler', {'fields': ('imar_durumu', 'm2', 'm2_fiyati', 'ada_no', 'parsel_no')}),
     ]
 
-    # --- İlan Pasif ise Nedenini Zorunlu Kılan Metot ---
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         
-        # Eğer ilan düzenleniyorsa ve durumu Pasif ise
         if obj and obj.durum == 'Pasif':
             if 'pasif_nedeni' in form.base_fields:
                 form.base_fields['pasif_nedeni'].required = True
@@ -93,18 +91,16 @@ class PotansiyelMusteriAdmin(admin.ModelAdmin):
 
 @admin.register(Randevu)
 class RandevuAdmin(admin.ModelAdmin):
-    # list_display, search_fields ve fields/fieldsets'i düzeltin
     
     list_display = ('ilan', 'potansiyel_musteri', 'tarih_saat', 'durum')
     
     fields = (
         'ilan', 
-        'potansiyel_musteri', # <-- Sadece Foreign Key'i kullanın
+        'potansiyel_musteri',
         'tarih_saat', 
         'durum', 
         'notlar'
     )
     
-    # search_fields de PotansiyelMusteri'ye yönlendirilmelidir:
     search_fields = ('potansiyel_musteri__soyad', 'potansiyel_musteri__telefon')
 
