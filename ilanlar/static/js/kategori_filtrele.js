@@ -5,71 +5,65 @@
         const detayKategori = document.querySelector('#id_detay_kategori');
         const radyoButonlari = document.querySelectorAll('input[name="ana_kategori"]');
 
-        const tumVeriler = {
-            'konut': [{ val: 'daire', text: 'Daire' }, { val: 'villa', text: 'Villa' }, { val: 'mustakil', text: 'Müstakil Ev' }],
-            'isyeri': [{ val: 'dukkan', text: 'Dükkan' }, { val: 'ofis', text: 'Ofis' }, { val: 'depo', text: 'Depo' }],
-            'arsa': [{ val: 'tarla', text: 'Tarla' }, { val: 'bahce', text: 'Bahçe' }],
-            'diger': [{ val: 'baska', text: 'Belirtilmemiş / Başka' }]
+        if (!detayKategori) return;
+
+        // Kategori haritası
+        const harita = {
+            'konut': ['daire', 'villa', 'mustakil'],
+            'isyeri': ['dukkan', 'ofis', 'fabrika', 'depo'],
+            'arsa': ['tarla', 'bahce'],
+            'diger': ['baska']
         };
 
         function formAlanlariniDuzenle(secilen) {
-            // Ortak Alanlar (Brüt ve Net)
-            const brutAlani = document.querySelector('.field-brut');
-            const netAlani = document.querySelector('.field-net');
+            const brut = document.querySelector('.field-brut');
+            const net = document.querySelector('.field-net');
+            const isyeriGizle = document.querySelectorAll('.field-banyo_sayisi, .field-mutfak_tipi, .field-krediye_uygun, .field-kimden');
+            const binaAlanlari = document.querySelectorAll('.field-bina_yasi, .field-bulundugu_kat, .field-kat_sayisi, .field-isitma_tipi, .field-balkon, .field-asansor, .field-site_icerisinde, .field-site_adi, .field-esyali, .field-kullanim_durumu, .field-tapu_durumu, .field-takas, .field-oda_sayisi, .field-otopark_durumu, .field-aidat');
+            const arsaAlanlari = document.querySelectorAll('.field-imar_durumu, .field-ada_no, .field-parsel_no, .field-m2, .field-m2_fiyati');
 
-            // İş Yerinde Gizlenecekler
-            const isyeriGizlenecekler = document.querySelectorAll('.field-banyo_sayisi, .field-mutfak_tipi, .field-krediye_uygun, .field-kimden');
+            // Arsa/İşyeri Brüt-Net Mantığı
+            if (brut) brut.style.display = (secilen === 'arsa' || secilen === 'isyeri') ? 'none' : 'block';
+            if (net) net.style.display = (secilen === 'arsa') ? 'none' : 'block';
 
-            // Bina/Site/Konut Alanları (Arsa seçildiğinde gizlenecek ana grup)
-            const binaVeSiteAlanlari = document.querySelectorAll('.field-bina_yasi, .field-bulundugu_kat, .field-kat_sayisi, .field-isitma_tipi, .field-balkon, .field-asansor, .field-site_icerisinde, .field-site_adi, .field-esyali, .field-kullanim_durumu, .field-tapu_durumu, .field-takas, .field-oda_sayisi, .field-otopark_durumu, .field-aidat');
+            // Grupları Temizle
+            binaAlanlari.forEach(el => el.style.display = 'none');
+            isyeriGizle.forEach(el => el.style.display = 'none');
+            arsaAlanlari.forEach(el => el.style.display = 'none');
 
-            // Arsa Özel Alanları (Sadece Arsa seçilince görünecekler)
-            const arsaOzelAlanlari = document.querySelectorAll('.field-imar_durumu, .field-ada_no, .field-parsel_no, .field-m2, .field-m2_fiyati');
-
-            // --- 1. BRÜT / NET GİZLEME MANTIĞI ---
-            if (secilen === 'arsa') {
-                if (brutAlani) brutAlani.style.display = 'none';
-                if (netAlani) netAlani.style.display = 'none';
-            } else if (secilen === 'isyeri') {
-                if (brutAlani) brutAlani.style.display = 'none';
-                if (netAlani) netAlani.style.display = 'block';
-            } else {
-                if (brutAlani) brutAlani.style.display = 'block';
-                if (netAlani) netAlani.style.display = 'block';
-            }
-
-            // --- 2. GENEL SIFIRLAMA (Hepsini Gizle) ---
-            binaVeSiteAlanlari.forEach(el => el.style.display = 'none');
-            isyeriGizlenecekler.forEach(el => el.style.display = 'none');
-            arsaOzelAlanlari.forEach(el => el.style.display = 'none');
-
-            // --- 3. KATEGORİYE ÖZEL GÖSTERİM ---
+            // Kategoriye Göre Göster
             if (secilen === 'konut') {
-                binaVeSiteAlanlari.forEach(el => el.style.display = 'block');
-                isyeriGizlenecekler.forEach(el => el.style.display = 'block');
-            }
-            else if (secilen === 'isyeri') {
-                binaVeSiteAlanlari.forEach(el => el.style.display = 'block');
-                // İş yerinde site adı ve banyo gibi alanlar kapalı kalsın
-            }
-            else if (secilen === 'arsa') {
-                arsaOzelAlanlari.forEach(el => el.style.display = 'block');
-                // Arsa seçildiğinde binaVeSiteAlanlari grubu 'none' olarak kalır.
+                binaAlanlari.forEach(el => el.style.display = 'block');
+                isyeriGizle.forEach(el => el.style.display = 'block');
+            } else if (secilen === 'isyeri') {
+                binaAlanlari.forEach(el => el.style.display = 'block');
+            } else if (secilen === 'arsa') {
+                arsaAlanlari.forEach(el => el.style.display = 'block');
             }
         }
 
-        function filtrele(secilenDeger) {
-            if (!detayKategori) return;
-            detayKategori.innerHTML = '<option value="">---------</option>';
-            if (secilenDeger && tumVeriler[secilenDeger]) {
-                tumVeriler[secilenDeger].forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item.val;
-                    opt.text = item.text;
-                    detayKategori.appendChild(opt);
-                });
+        function filtrele(secilenAna) {
+            const izinliler = harita[secilenAna] || [];
+
+            // KRİTİK: innerHTML kullanmıyoruz, sadece gizliyoruz
+            Array.from(detayKategori.options).forEach(opt => {
+                if (opt.value === "" || izinliler.includes(opt.value)) {
+                    opt.hidden = false;
+                    opt.disabled = false;
+                    opt.style.display = "block";
+                } else {
+                    opt.hidden = true;
+                    opt.disabled = true;
+                    opt.style.display = "none";
+                }
+            });
+
+            // Seçili olan yasaklıysa sıfırla
+            if (detayKategori.selectedOptions[0] && detayKategori.selectedOptions[0].disabled) {
+                detayKategori.value = "";
             }
-            formAlanlariniDuzenle(secilenDeger);
+
+            formAlanlariniDuzenle(secilenAna);
         }
 
         radyoButonlari.forEach(radio => {

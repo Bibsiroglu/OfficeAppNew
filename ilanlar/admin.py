@@ -64,7 +64,7 @@ class IlanAdmin(admin.ModelAdmin):
             'fields': ('il', 'ilce', 'mahalle', 'adres'), 
         }),
         ('Konut İlanına Ait Ek Bilgiler', {
-            'fields': ('kat_sayisi', 'bulundugu_kat', 'banyo_sayisi', 'bina_yasi', 'mutfak_tipi', 'isitma_tipi', 'esyali', 'site_icerisinde', 'site_adi', 'kullanim_durumu', 'tapu_durumu', 'krediye_uygun', 'kimden', 'takas'),
+            'fields': ('oda_sayisi', 'kat_sayisi', 'bulundugu_kat', 'banyo_sayisi', 'bina_yasi', 'mutfak_tipi', 'isitma_tipi', 'esyali', 'site_icerisinde', 'site_adi', 'kullanim_durumu', 'tapu_durumu', 'krediye_uygun', 'kimden', 'takas'),
         }),
         ('Arazi İlanına Ait Ek Bilgiler', {'fields': ('imar_durumu', 'm2', 'm2_fiyati', 'ada_no', 'parsel_no')}),
     ]

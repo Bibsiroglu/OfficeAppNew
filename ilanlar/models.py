@@ -90,6 +90,7 @@ DETAY_KATEGORI_SECENEKLERI = [
     # İş Yeri Seçenekleri
     ('dukkan', 'Dükkan'),
     ('ofis', 'Ofis'),
+    ('fabrika', 'Fabrika'),
     ('depo', 'Depo'),
     
     # Arsa Seçenekleri
@@ -108,7 +109,8 @@ DURUM_SECENEKLERI = [
 PASIF_NEDENLERI = [
     ('Satildi', 'Satıldı'),
     ('Kiralandi', 'Kiralandı'),
-    ('Kadirildi', 'Kullanıcı Tarafından Kaldırıldı'),
+    ('Yayin_Suresi_Bitti', 'Yayın Süresi Bitti'),
+    ('Kadirildi', 'Kullanıcı Tarafından Kaldırıldı')
 ]
 
 class Ilan(models.Model):
@@ -177,7 +179,7 @@ class Ilan(models.Model):
     
     # Diğer Temel Alanlar (KONUT)
     fiyat = models.DecimalField(max_digits=10, decimal_places=3, verbose_name="Fiyat")
-    brut = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Brüt Alan (m²)")
+    brut = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True, verbose_name="Brüt Alan (m²)")
     net = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Net Alan (m²)")
     oda_sayisi = models.CharField(
         max_length=10, 
