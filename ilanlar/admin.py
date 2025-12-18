@@ -5,6 +5,14 @@ from django.utils.safestring import mark_safe
 from .models import Ilan, Musteri, PotansiyelMusteri, Randevu 
 
 
+class IlanInline(admin.TabularInline):
+    model = Ilan
+    extra = 0
+    fields = ('ilan_no', 'baslik', 'islem_tipi', 'fiyat', 'durum', 'durum_kontrol')
+    readonly_fields = ('ilan_no', 'baslik', 'islem_tipi', 'fiyat', 'durum_kontrol')
+    can_delete = False
+    show_change_link = True
+
 def fiyat_goster(obj):
     """Fiyatı Türkçe para birimi formatında gösterir."""
     try:
@@ -24,8 +32,17 @@ durum_kontrol.short_description = "Durum"
 @admin.register(Musteri)
 
 class MusteriAdmin(admin.ModelAdmin):
-    list_display = ('ad', 'soyad', 'telefon')
-    search_fields = ('ad', 'soyad', 'telefon')
+    list_display = ('ad', 'soyad', 'telefon', 'aktif_ilanlar', 'pasif_ilanlar')
+    inlines = [IlanInline] 
+
+    def aktif_ilanlar(self, obj):
+        return obj.ilanlar.filter(durum='Aktif').count()
+    aktif_ilanlar.short_description = "🟢 Aktif"
+
+    def pasif_ilanlar(self, obj):
+        return obj.ilanlar.filter(durum='Pasif').count()
+    pasif_ilanlar.short_description = "🔴 Pasif"
+
 
 @admin.register(Ilan)
 class IlanAdmin(admin.ModelAdmin):
