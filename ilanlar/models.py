@@ -335,7 +335,11 @@ class Randevu(models.Model):
     tarih_saat = models.DateTimeField(default=timezone.now, verbose_name="Randevu Tarihi ve Saati")
     durum = models.CharField(max_length=5, choices=DURUM_SECENEKLERI, default='PLAN', verbose_name="Durum")
     notlar = models.TextField(blank=True, null=True, verbose_name="Ek Notlar/Detaylar")
-    
+
+    class Meta:
+        verbose_name = "Randevu"
+        verbose_name_plural = "Randevular"
+        
     def __str__(self):
         # Randevu alan müşterinin adını gösterir
         return f"{self.potansiyel_musteri.ad} - {self.ilan.ilan_no} Randevusu"

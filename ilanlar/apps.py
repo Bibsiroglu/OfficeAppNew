@@ -4,3 +4,4 @@ from django.apps import AppConfig
 class IlanlarConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'ilanlar'
+    verbose_name = 'EMLAK YÖNETİM SİSTEMİ'
