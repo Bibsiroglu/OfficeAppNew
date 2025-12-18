@@ -284,6 +284,7 @@ class Ilan(models.Model):
         verbose_name = "İlan"
         verbose_name_plural = "İlanlar"
         ordering = ['-ilan_tarihi']
+    
 
 class Musteri(models.Model):
     ad = models.CharField(max_length=50, verbose_name="Ad")
@@ -339,7 +340,7 @@ class Randevu(models.Model):
     class Meta:
         verbose_name = "Randevu"
         verbose_name_plural = "Randevular"
-        
+
     def __str__(self):
         # Randevu alan müşterinin adını gösterir
         return f"{self.potansiyel_musteri.ad} - {self.ilan.ilan_no} Randevusu"

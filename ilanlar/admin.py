@@ -82,8 +82,10 @@ class IlanAdmin(admin.ModelAdmin):
     
     class Media:
         js = (
-            'js/admin_ilan_kontrol.js', # Projenizin statik klasöründeki yol
+            'js/admin_ilan_kontrol.js',
+            'js/kategori_filtrele.js'
         )
+        
 @admin.register(PotansiyelMusteri)
 class PotansiyelMusteriAdmin(admin.ModelAdmin):
     list_display = ('ad', 'soyad', 'telefon', 'ilgili_ilan')
