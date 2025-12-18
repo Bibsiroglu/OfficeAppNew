@@ -112,7 +112,32 @@ PASIF_NEDENLERI = [
     ('Yayin_Suresi_Bitti', 'Yayın Süresi Bitti'),
     ('Kadirildi', 'Kullanıcı Tarafından Kaldırıldı')
 ]
+class Ajanda(models.Model):
+    DURUM_SECENEKLERI = [
+        ('Bekliyor', 'Bekliyor'),
+        ('Tamamlandi', 'Tamamlandı'),
+        ('İptal Edildi', 'İptal Edildi')
+    ]
 
+    ONCELIK_SECENEKLERI = [
+        ('1', 'Düşük'),
+        ('2', 'Orta'),
+        ('3', 'Yüksek')
+    ]
+    baslik = models.CharField(max_length=200, verbose_name="Görev Başlığı")
+    aciklama = models.TextField(blank=True, null=True, verbose_name="Açıklama")
+    tarih = models.DateTimeField(verbose_name="Görev Tarihi ve Saati")
+    oncelik = models.CharField(max_length=1, choices=ONCELIK_SECENEKLERI, default='2', verbose_name="Öncelik")
+    durum = models.CharField(max_length=20, choices=DURUM_SECENEKLERI, default='Bekliyor', verbose_name="Durum")
+
+    class Meta:
+        verbose_name = "Görev"
+        verbose_name_plural = "Ajanda / Görevler"
+        ordering = ['tarih']
+
+    def __str__(self):
+        return self.baslik
+    
 class Ilan(models.Model):
     yayindan_kaldirilma_tarihi = models.DateField(
         null=True, 

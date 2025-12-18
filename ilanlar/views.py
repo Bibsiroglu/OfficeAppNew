@@ -8,7 +8,7 @@ from numpy import convolve
 from sqlalchemy import Transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import transaction
-from .models import Ilan, Randevu, PotansiyelMusteri # Yeni modelleri import edin
+from .models import Ajanda, Ilan, Randevu, PotansiyelMusteri # Yeni modelleri import edin
 from .forms import RandevuOlusturForm
 from django.utils import timezone
 
@@ -205,3 +205,12 @@ class RandevuListView(ListView):
         return context
 
     
+def ajanda_sayfasi(request):
+    gorevler = Ajanda.objects.all().order_by('tarih')
+    return render(request, 'ajanda.html', {'gorevler': gorevler})
+
+def gorev_tamamla(request, gorev_id):
+    gorev = get_object_or_404(Ajanda, id=gorev_id)
+    gorev.durum = 'Tamamlandi'
+    gorev.save()
+    return redirect('ajanda_sayfasi')

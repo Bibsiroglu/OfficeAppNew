@@ -1,9 +1,14 @@
 
 import json
 from django.contrib import admin
+from django.shortcuts import render
 from django.utils.safestring import mark_safe
-from .models import Ilan, Musteri, PotansiyelMusteri, Randevu 
+from .models import Ajanda, Ilan, Musteri, PotansiyelMusteri, Randevu 
 
+@admin.register(Ajanda)
+class AjandaAdmin(admin.ModelAdmin):
+    list_display = ('baslik', 'tarih', 'oncelik', 'durum')
+    list_filter = ('durum', 'oncelik')
 
 class IlanInline(admin.TabularInline):
     model = Ilan

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .agenda-header {
+        background: #2c3e50;
+        color: white;
+        padding: 1.5rem 0;
+        margin-bottom: 2rem;
+        border-radius: 10px;
+    }
+
+    .oncelik-3 {
+        border-left: 5px solid #e74c3c;
+    }
+
+    /* Yüksek */
+    .oncelik-2 {
+        border-left: 5px solid #f39c12;
+    }
+
+    /* Orta */
+    .oncelik-1 {
+        border-left: 5px solid #27ae60;
+    }
+
+    /* Düşük */
+    .card {
+        transition: transform 0.2s;
+        border: none;
+    }
+
+    .card:hover {
+        transform: scale(1.01);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .tamamlandi {
+        background-color: #f8f9fa;
+        opacity: 0.7;
+    }
+
+    .tamamlandi .card-title {
+        text-decoration: line-through;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="agenda-header text-center shadow">
+        <div class="container">
+            <h1><i class="fas fa-user-shield me-2"></i> Görev Ajandası</h1>
+            <p class="mb-0">Günlük işlerinizi ve randevularınızı takip edin.</p>
+            <button class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#gorevEkleModal">
+                <i class="fas fa-plus-circle me-1"></i> Yeni Görev Ekle
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for gorev in gorevler %}
+        <div class="col-12 col-lg-10 mx-auto mb-3">
+            <div
+                class="card shadow-sm oncelik-{{ gorev.oncelik }} {% if gorev.durum == 'Tamamlandi' %}tamamlandi{% endif %}">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="far fa-calendar-alt text-primary me-2"></i>
+                            <span class="text-muted small fw-bold">{{ gorev.tarih|date:"d E Y - H:i" }}</span>
+                        </div>
+                        <h5 class="card-title">{{ gorev.baslik }}</h5>
+                        <p class="card-text text-secondary mb-0">{{ gorev.aciklama|default:"Açıklama girilmedi." }}</p>
+                    </div>
+                    <div class="text-end">
+                        <span
+                            class="badge {% if gorev.durum == 'Bekliyor' %}bg-warning text-dark{% elif gorev.durum == 'Tamamlandi' %}bg-success{% else %}bg-danger{% endif %} mb-2 d-block">
+                            {{ gorev.durum }}
+                        </span>
+
+                        <div class="btn-group">
+                            {% if gorev.durum != 'Tamamlandi' %}
+                            <a href="{% url 'gorev_tamamla' gorev.id %}" class="btn btn-sm btn-outline-success"
+                                title="Tamamlandı olarak işaretle">
+                                <i class="fas fa-check"></i>
+                            </a>
+                            {% endif %}
+                            <a href="/admin/ilanlar/ajanda/{{ gorev.id }}/change/"
+                                class="btn btn-sm btn-outline-primary" title="Admin'de Düzenle">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 col-lg-10 mx-auto">
+            <div class="alert alert-info text-center border-0 shadow-sm">
+                <i class="fas fa-info-circle me-2"></i> Henüz planlanmış bir görev bulunmuyor.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="gorevEkleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-shield me-2"></i>Yeni Görev Oluştur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <p>Yeni görev eklemek için Admin paneline yönlendirileceksiniz.</p>
+                <a href="/admin/ilanlar/ajanda/add/" class="btn btn-primary px-4">
+                    <i class="fas fa-external-link-alt me-2"></i>Admin Paneline Git
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
