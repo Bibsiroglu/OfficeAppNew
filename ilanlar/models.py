@@ -101,11 +101,6 @@ DETAY_KATEGORI_SECENEKLERI = [
     ('baska', 'Belirtilmemiş / Başka'),
 ]
 
-DURUM_SECENEKLERI = [
-    ('Aktif', 'Aktif'), 
-    ('Pasif', 'Pasif')
-]
-
 PASIF_NEDENLERI = [
     ('Satildi', 'Satıldı'),
     ('Kiralandi', 'Kiralandı'),
@@ -113,6 +108,7 @@ PASIF_NEDENLERI = [
     ('Kadirildi', 'Kullanıcı Tarafından Kaldırıldı')
 ]
 class Ajanda(models.Model):
+
     DURUM_SECENEKLERI = [
         ('Bekliyor', 'Bekliyor'),
         ('Tamamlandi', 'Tamamlandı'),
@@ -139,6 +135,10 @@ class Ajanda(models.Model):
         return self.baslik
     
 class Ilan(models.Model):
+    DURUM_SECENEKLERI = [
+        ('Aktif', 'Aktif'), 
+        ('Pasif', 'Pasif')
+    ]
     yayindan_kaldirilma_tarihi = models.DateField(
         null=True, 
         blank=True, 
@@ -274,6 +274,12 @@ class Ilan(models.Model):
     m2_fiyati = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="m² Fiyatı")
     ada_no = models.CharField(max_length=50, null=True, blank=True, verbose_name="Ada No")
     parsel_no = models.CharField(max_length=50, null=True, blank=True, verbose_name="Parsel No")
+
+    def save(self, *args, **kwargs):
+        # Eğer ilan durumu AKTIF ise, pasif nedenini otomatik olarak temizle
+        if self.durum == 'Aktif':
+            self.pasif_nedeni = ""
+        super(Ilan, self).save(*args, **kwargs)
 
     def net_alan_orani(self):
         """Net alanın brüt alana oranını hesaplar (Yüzde olarak)."""
