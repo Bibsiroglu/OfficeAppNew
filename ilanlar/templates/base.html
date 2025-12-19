@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        /* Canlılık katan küçük dokunuşlar */
+        /* Mevcut stillerin korunuyor */
         .nav-link {
             transition: all 0.3s ease;
         }
@@ -37,24 +37,23 @@
             color: #ff5252;
         }
 
-        /* Canlı Kırmızı */
         .icon-ajanda {
             color: #40c4ff;
         }
 
-        /* Gökyüzü Mavisi */
         .icon-ilanlar {
             color: #69f0ae;
         }
 
-        /* Parlak Yeşil */
         .icon-randevu {
             color: #ffd740;
         }
 
-        /* Altın Sarısı */
+        /* YENİ: AI İkon Rengi (Mor - Sihirli bir hava için) */
+        .icon-ai {
+            color: #b388ff;
+        }
 
-        /* Footer canlandırma */
         footer {
             border-top: 3px solid #6c5ce7;
             background: #f1f2f6 !important;
@@ -70,14 +69,12 @@
             <a class="navbar-brand" href="{% url 'ilan_listesi' %}">
                 <i class="fa-solid fa-house-chimney-window me-2"></i>EMLAK<span class="text-white">PRO</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
 
-                    {# ADMIN PANELİ #}
                     <li class="nav-item">
                         <a class="nav-link btn btn-sm btn-outline-danger ms-md-2 px-3 border-0" href="/admin/">
                             <i class="fas fa-user-shield icon-admin fa-lg"></i> <span
@@ -85,24 +82,28 @@
                         </a>
                     </li>
 
-                    {# AJANDA #}
                     <li class="nav-item">
                         <a class="nav-link ms-md-2" href="{% url 'ajanda_sayfasi' %}">
                             <i class="fa-solid fa-calendar-check icon-ajanda fa-lg"></i> Ajanda
                         </a>
                     </li>
 
-                    {# İlanlar Sayfası #}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'ilan_listesi' %}">
                             <i class="fa-solid fa-layer-group icon-ilanlar fa-lg"></i> Portföy
                         </a>
                     </li>
 
-                    {# RANDEVULAR LİSTESİ #}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'randevu_listesi' %}">
                             <i class="fa-solid fa-clock icon-randevu fa-lg"></i> Randevular
+                        </a>
+                    </li>
+
+                    {# YENİ: AI ASİSTANI #}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'ai_asistan' %}">
+                            <i class="fa-solid fa-wand-magic-sparkles icon-ai fa-lg"></i> AI Asistan
                         </a>
                     </li>
 
@@ -110,7 +111,6 @@
                         <div class="vr text-white opacity-25" style="height: 30px;"></div>
                     </li>
 
-                    {# YENİ İLAN EKLE #}
                     <li class="nav-item">
                         <a class="nav-link btn btn-sm btn-success text-white ms-md-2 px-3 btn-hover shadow-sm"
                             href="/admin/ilanlar/ilan/add/">
@@ -118,7 +118,6 @@
                         </a>
                     </li>
 
-                    {# RANDEVU EKLE #}
                     <li class="nav-item">
                         <a class="nav-link btn btn-sm btn-primary text-white ms-md-2 px-3 btn-hover shadow-sm"
                             href="/admin/ilanlar/randevu/add/">
@@ -131,8 +130,7 @@
     </nav>
 
     <div class="container my-5">
-        {% block content %}
-        {% endblock content %}
+        {% block content %}{% endblock content %}
     </div>
 
     <footer class="py-4 text-center mt-auto">
@@ -146,10 +144,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    {% block extra_js %}
-    {% endblock extra_js %}
-
+    {% block extra_js %}{% endblock extra_js %}
 </body>
 
 </html>

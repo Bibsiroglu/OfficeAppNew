@@ -12,6 +12,9 @@ from .models import Ajanda, Ilan, Randevu, PotansiyelMusteri # Yeni modelleri im
 from .forms import RandevuOlusturForm
 from django.utils import timezone
 from django.db.models import Count
+import google.generativeai as genai
+from django.http import JsonResponse
+from django.conf import settings
 
 from ilanlar.models import Ilan 
 
@@ -188,7 +191,7 @@ class RandevuListView(ListView):
             tarih_saat__gte=on_bes_gun_oncesi  # Filtreyi buraya ekledik
         ).values('ilan__baslik').annotate(
             toplam_randevu=Count('id')
-        ).order_by('-toplam_randevu')[:5]
+                ).order_by('-toplam_randevu')[:5]
 
     # Listeleri hazırlayalım (JavaScript'e göndermek için)
         context['ilan_basliklari'] = [item['ilan__baslik'] for item in populer_ilanlar]
@@ -228,3 +231,34 @@ def gorev_tamamla(request, gorev_id):
     gorev.durum = 'Tamamlandi'
     gorev.save()
     return redirect('ajanda_sayfasi')
+
+def ai_asistan_sayfasi(request):
+    ilanlar = Ilan.objects.all()
+    ai_sonuc = None
+    
+    if request.method == "POST":
+        secilen_ilan_id = request.POST.get('ilan_id')
+        ilan = Ilan.objects.get(id=secilen_ilan_id)
+        
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        
+        try:
+            # Listenin en başındaki en güncel modeli kullanıyoruz
+            model = genai.GenerativeModel('models/gemini-2.5-flash')
+            
+            prompt = f"""
+            Bir gayrimenkul uzmanı gibi davran. 
+            Başlık: {ilan.baslik}
+            Konum: {ilan.ilce} / {ilan.il}
+            Fiyat: {ilan.fiyat} TL
+            Bu özelliklere sahip emlak ilanı için profesyonel bir açıklama yaz.
+            """
+            
+            response = model.generate_content(prompt)
+            ai_sonuc = response.text
+            
+        except Exception as e:
+            print(f"Sistem Hatası: {e}")
+            ai_sonuc = f"İçerik üretilirken bir hata oluştu: {e}"
+            
+    return render(request, 'ilanlar/ai_asistan.html', {'ilanlar': ilanlar, 'ai_sonuc': ai_sonuc})
