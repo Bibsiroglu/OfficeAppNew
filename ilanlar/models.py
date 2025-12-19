@@ -203,7 +203,11 @@ class Ilan(models.Model):
     )
     
     # Diğer Temel Alanlar (KONUT)
-    fiyat = models.DecimalField(max_digits=10, decimal_places=3, verbose_name="Fiyat")
+    fiyat = models.DecimalField(
+    max_digits=15, 
+    decimal_places=2, # Emlakta virgülden sonra 2 basamak (kuruş) yeterlidir
+    verbose_name="Fiyat"
+)
     brut = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True, verbose_name="Brüt Alan (m²)")
     net = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Net Alan (m²)")
     oda_sayisi = models.CharField(
