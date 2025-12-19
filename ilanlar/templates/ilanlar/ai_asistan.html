@@ -1,27 +1,137 @@
 {% extends "base.html" %}
-{% block title %}AI Asistanı{% endblock %}
+{% block title %}AI Yazım Asistanı{% endblock %}
 
 {% block content %}
-<div class="card shadow">
-    <div class="card-header bg-primary text-white">
-        <h4>✨ AI Emlak Asistanı</h4>
-    </div>
-    <div class="card-body">
-        <form method="POST">
-            {% csrf_token %}
-            <select name="ilan_id" class="form-select mb-3">
-                {% for ilan in ilanlar %}
-                <option value="{{ ilan.id }}">{{ ilan.baslik }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit" class="btn btn-primary">İçerik Üret</button>
-        </form>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
 
-        {% if ai_sonuc %}
-        <div class="mt-4 p-3 bg-light border">
-            {{ ai_sonuc|linebreaks }}
+                <div class="p-4 border-bottom border-light">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="color: #2d3436; letter-spacing: -1px;">AI İçerik Stüdyosu
+                            </h3>
+                            <p class="text-muted small mb-0">İlanlarınız için saniyeler içinde büyüleyici metinler
+                                oluşturun.</p>
+                        </div>
+                        <div class="bg-light rounded-circle p-3">
+                            <i class="fa-solid fa-wand-magic-sparkles text-primary fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="mb-5">
+                            <label class="form-label small fw-bold text-uppercase text-muted mb-3">Hangi İlan İçin
+                                Yazalım?</label>
+                            <select name="ilan_id" class="form-select border-0 bg-light p-3"
+                                style="border-radius: 12px; font-size: 0.95rem;" required>
+                                <option value="" disabled selected>Portföyden seçim yapın...</option>
+                                {% for ilan in ilanlar %}
+                                <option value="{{ ilan.id }}">{{ ilan.ilan_no }} — {{ ilan.baslik }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="small fw-bold text-uppercase text-muted d-block mb-3">Nerede
+                                Paylaşacaksınız?</label>
+                            <div class="row g-3">
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="tur" id="tur1" value="ilan" checked>
+                                    <label
+                                        class="btn btn-outline-light w-100 p-3 py-4 text-dark border-0 bg-light shadow-none custom-radio"
+                                        for="tur1">
+                                        <i class="fa-solid fa-globe mb-2 d-block fa-xl text-primary"></i>
+                                        <span class="d-block small fw-bold">Web Sitesi</span>
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="tur" id="tur2" value="instagram">
+                                    <label
+                                        class="btn btn-outline-light w-100 p-3 py-4 text-dark border-0 bg-light shadow-none custom-radio"
+                                        for="tur2">
+                                        <i class="fa-brands fa-instagram mb-2 d-block fa-xl text-danger"></i>
+                                        <span class="d-block small fw-bold">Instagram</span>
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="tur" id="tur3" value="whatsapp">
+                                    <label
+                                        class="btn btn-outline-light w-100 p-3 py-4 text-dark border-0 bg-light shadow-none custom-radio"
+                                        for="tur3">
+                                        <i class="fa-brands fa-whatsapp mb-2 d-block fa-xl text-success"></i>
+                                        <span class="d-block small fw-bold">WhatsApp</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm"
+                            style="border-radius: 16px; background: #6c5ce7; border: none;">
+                            Metni Oluştur
+                        </button>
+                    </form>
+
+                    {% if ai_sonuc %}
+                    <div class="mt-5 pt-5 border-top border-light animate__animated animate__fadeIn">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <h5 class="fw-bold mb-0">Sizin İçin Hazırladık</h5>
+                            <button class="btn btn-light btn-sm rounded-pill px-3" onclick="copyToClipboard()">
+                                <i class="fa-solid fa-copy me-1"></i> Kopyala
+                            </button>
+                        </div>
+                        <div class="p-4 bg-light rounded-4 position-relative"
+                            style="background-color: #f8f9fa !important; border-radius: 20px;">
+                            <div id="ai-text"
+                                style="white-space: pre-wrap; line-height: 1.8; color: #4b4b4b; font-size: 1rem;">
+                                {{ ai_sonuc }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <p class="text-center mt-4 text-muted small">Powered by <span class="fw-bold">Gemini 2.5 Flash</span></p>
         </div>
-        {% endif %}
     </div>
 </div>
+
+<style>
+    /* Estetik Radyo Buton Efektleri */
+    .custom-radio {
+        border-radius: 20px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0.6;
+    }
+
+    .btn-check:checked+.custom-radio {
+        background: #ffffff !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+        opacity: 1;
+        transform: translateY(-5px);
+    }
+
+    .form-select:focus {
+        box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        background-color: #fff;
+    }
+</style>
+
+<script>
+    function copyToClipboard() {
+        const text = document.getElementById('ai-text').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Tamamdır!';
+            setTimeout(() => btn.innerHTML = originalText, 2000);
+        });
+    }
+</script>
 {% endblock %}

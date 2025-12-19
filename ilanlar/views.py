@@ -238,6 +238,7 @@ def ai_asistan_sayfasi(request):
     
     if request.method == "POST":
         secilen_ilan_id = request.POST.get('ilan_id')
+        icerik_turu = request.POST.get('tur')
         ilan = Ilan.objects.get(id=secilen_ilan_id)
         
         genai.configure(api_key=settings.GEMINI_API_KEY)
@@ -245,8 +246,17 @@ def ai_asistan_sayfasi(request):
         try:
             # Listenin en başındaki en güncel modeli kullanıyoruz
             model = genai.GenerativeModel('models/gemini-2.5-flash')
+
+            if icerik_turu == "instagram":
+                talimat = "Bu ilan için bol emojili, merak uyandıran bir Instagram post metni ve 10 tane popüler emlak hashtag'i hazırla."
+            elif icerik_turu == "whatsapp":
+                talimat = "Bu ilan için potansiyel bir müşteriye WhatsApp üzerinden gönderilecek kısa, samimi ve teknik bilgileri içeren bir tanıtım mesajı yaz."
+            else:
+                talimat = "Bu taşınmaz için profesyonel, ciddi ve ikna edici bir web sitesi ilan açıklaması yaz."
+
             
             prompt = f"""
+            {talimat}
             Bir gayrimenkul uzmanı gibi davran. 
             Başlık: {ilan.baslik}
             Konum: {ilan.ilce} / {ilan.il}
