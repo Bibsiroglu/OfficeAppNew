@@ -1,186 +1,192 @@
 {% extends "base.html" %}
-
 {% load static %}
-{% load humanize %} {# Örneğin sayılarda binlik ayırıcı kullanmak isterseniz (opsiyonel) #}
+{% load humanize %}
 
 {% block title %}Randevu Listesi ve İstatistikleri{% endblock title %}
 
 {% block content %}
-<div class="row">
+<div class="container-fluid">
+    <div class="row">
+        {# --- SOL PANEL: GRAFİKLER --- #}
+        <div class="col-lg-4">
+            {# 1. Grafik: Durum Dağılımı #}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-chart-pie me-1"></i> 📊 Randevu Durum Dağılımı (Son 15 Gün)
+                </div>
+                <div class="card-body">
+                    <canvas id="randevuDurumGrafigi"></canvas>
+                </div>
+                <div class="card-footer text-muted">
+                    Toplam Randevu: <strong class="text-dark">{{ toplam_randevu_sayisi|intcomma }}</strong>
+                </div>
+            </div>
 
-    {# Randevu İstatistikleri ve Grafik Alanı (Sol/Üst Kısım) #}
-    <div class="col-lg-4 mb-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-info text-white">
-                📊 Randevu Durum Dağılımı
-            </div>
-            <div class="card-body">
-                <canvas id="randevuDurumGrafigi"></canvas>
-            </div>
-            <div class="card-footer text-muted">
-                Toplam Randevu: <strong class="text-dark">{{ toplam_randevu_sayisi|intcomma }}</strong>
+            {# 2. Grafik: İlan Performansı #}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-chart-bar me-1"></i> 🔥 En Çok İlgi Gören İlanlar (Son 15 Gün)
+                </div>
+                <div class="card-body">
+                    <canvas id="ilanPerformansGrafigi"></canvas>
+                </div>
+                <div class="card-footer text-muted small">
+                    Tamamlanan randevu sayılarına göredir.
+                </div>
             </div>
         </div>
-    </div>
 
-    {# Randevu Listesi Alanı (Sağ/Alt Kısım) #}
-    <div class="col-lg-8">
-        <h2 class="mb-4">📅 Tüm Randevular (Toplam {{ page_obj.paginator.count }} Adet)</h2>
-
-        <p>
-            <a href="{% url 'ilan_listesi' %}" class="btn btn-secondary btn-sm">🏡 İlan Listesi</a>
-            <a href="/admin/ilanlar/randevu/add/" class="btn btn-primary btn-sm">➕ Yeni Randevu Ekle</a>
-        </p>
-
-        <div class="list-group shadow-sm">
-            {# --- BAŞLIK SATIRI (Sütunlar) --- #}
-            <div class="list-group-item list-group-item-action bg-dark text-white d-none d-md-flex py-3">
-                <div class="col-md-2 fw-bold">Tarih/Saat</div>
-                <div class="col-md-2 fw-bold">Müşteri (Adı/Soyadı)</div>
-                <div class="col-md-2 fw-bold">Telefon</div>
-                <div class="col-md-4 fw-bold">İlgili İlan</div>
-                <div class="col-md-2 fw-bold text-center">Durum / Aksiyon</div>
+        {# --- SAĞ PANEL: RANDEVU LİSTESİ --- #}
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">📅 Tüm Randevular <small class="text-muted">({{ randevular.count }} Adet)</small></h2>
+                <div>
+                    <a href="/admin/ilanlar/randevu/add/" class="btn btn-primary btn-sm">➕ Yeni Randevu Ekle</a>
+                </div>
             </div>
 
-            {# --- RANDEVU LİSTESİ DÖNGÜSÜ --- #}
-            {% for randevu in randevular %}
-            <div class="list-group-item list-group-item-action d-flex flex-wrap align-items-center py-3">
-
-                {# 1. TARİH/SAAT (col-md-2) #}
-                <div class="col-md-2 mb-2 mb-md-0">
-                    <span class="fw-bold">{{ randevu.tarih_saat|date:"d.m.Y" }}</span>
-                    <small class="d-block text-muted">{{ randevu.tarih_saat|date:"H:i" }}</small>
+            <div class="list-group shadow-sm">
+                {# BAŞLIK SATIRI #}
+                <div class="list-group-item bg-dark text-white d-none d-md-flex py-3">
+                    <div class="col-md-2 fw-bold">Tarih/Saat</div>
+                    <div class="col-md-2 fw-bold">Müşteri</div>
+                    <div class="col-md-2 fw-bold">Telefon</div>
+                    <div class="col-md-4 fw-bold">İlgili İlan</div>
+                    <div class="col-md-2 fw-bold text-center">Durum / Aksiyon</div>
                 </div>
 
-                {# 2. MÜŞTERİ ADI SOYADI (col-md-2) #}
-                <div class="col-md-2 mb-2 mb-md-0 text-truncate">
-                    {% with musteri=randevu.potansiyel_musteri %}
-                    <a href="/admin/ilanlar/potansiyelmusteri/{{ musteri.pk }}/change/"
-                        class="mb-0 fw-bold text-primary text-decoration-none">
-                        {{ musteri.ad }} {{ musteri.soyad }}
-                    </a>
-                    {% endwith %}
-                </div>
+                {# LİSTE DÖNGÜSÜ #}
+                {% for randevu in randevular %}
+                <div class="list-group-item list-group-item-action d-flex flex-wrap align-items-center py-3">
+                    <div class="col-md-2">
+                        <span class="fw-bold">{{ randevu.tarih_saat|date:"d.m.Y" }}</span>
+                        <small class="d-block text-muted">{{ randevu.tarih_saat|date:"H:i" }}</small>
+                    </div>
 
-                {# 3. TELEFON (col-md-2) #}
-                <div class="col-md-2 mb-2 mb-md-0">
-                    <i class="fas fa-phone me-1 text-info"></i>
-                    <span class="text-secondary">{{ randevu.potansiyel_musteri.telefon }}</span>
-                </div>
-
-                {# 4. İLGİLİ İLAN (col-md-4) #}
-                <div class="col-md-4 mb-2 mb-md-0 text-truncate">
-                    {% if randevu.ilan %}
-                    <a href="{% url 'ilan_detay' pk=randevu.ilan.pk %}" title="{{ randevu.ilan.baslik }}">
-                        {{ randevu.ilan.ilan_no }} - {{ randevu.ilan.baslik|truncatechars:30 }}
-                    </a>
-                    {% else %}
-                    - İlan Bağlantısı Yok -
-                    {% endif %}
-                </div>
-
-                {# 5. DURUM VE AKSİYONLAR (col-md-2) #}
-                <div class="col-md-2 text-center">
-                    {% with durum_kisa=randevu.durum %}
-
-                    {# --- MEVCUT DURUM ROZETİ (GÖSTERİM) --- #}
-                    <div class="mb-2">
-                        {% if durum_kisa == 'TAMAM' %}
-                        <span class="badge bg-success">{{ randevu.get_durum_display }}</span>
-                        {% elif durum_kisa == 'IPTAL' %}
-                        <span class="badge bg-danger">{{ randevu.get_durum_display }}</span>
+                    <div class="col-md-2 text-truncate">
+                        {% if randevu.potansiyel_musteri %}
+                        <a href="/admin/ilanlar/potansiyelmusteri/{{ randevu.potansiyel_musteri.pk }}/change/"
+                            class="fw-bold text-primary text-decoration-none">
+                            {{ randevu.potansiyel_musteri.ad }} {{ randevu.potansiyel_musteri.soyad }}
+                        </a>
                         {% else %}
-                        <span class="badge bg-warning text-dark">{{ randevu.get_durum_display }}</span>
+                        <span class="text-muted">Müşteri Yok</span>
                         {% endif %}
                     </div>
 
-                    {# --- DURUM DEĞİŞTİRME BUTON GRUBU --- #}
-                    <div class="btn-group btn-group-sm mb-2" role="group">
-                        {# Tamamla Butonu #}
-                        {% if durum_kisa != 'TAMAM' %}
-                        <a href="{% url 'randevu_durum_degistir' pk=randevu.pk yeni_durum='TAMAM' %}"
-                            class="btn btn-success" title="Randevuyu Tamamla">
-                            <i class="fas fa-check"></i>
-                        </a>
-                        {% endif %}
+                    <div class="col-md-2">
+                        <i class="fas fa-phone me-1 text-info small"></i>
+                        <span class="text-secondary small">{{ randevu.potansiyel_musteri.telefon|default:"-" }}</span>
+                    </div>
 
-                        {# İptal Et Butonu #}
-                        {% if durum_kisa != 'IPTAL' %}
-                        <a href="{% url 'randevu_durum_degistir' pk=randevu.pk yeni_durum='IPTAL' %}"
-                            class="btn btn-danger" title="Randevuyu İptal Et">
-                            <i class="fas fa-times"></i>
+                    <div class="col-md-4 text-truncate">
+                        {% if randevu.ilan %}
+                        <a href="{% url 'ilan_detay' pk=randevu.ilan.pk %}" class="text-decoration-none"
+                            title="{{ randevu.ilan.baslik }}">
+                            <span class="badge bg-light text-dark border">{{ randevu.ilan.ilan_no }}</span>
+                            <small>{{ randevu.ilan.baslik|truncatechars:25 }}</small>
                         </a>
-                        {% endif %}
-
-                        {# Tekrar Planla Butonu #}
-                        {% if durum_kisa != 'PLAN' %}
-                        <a href="{% url 'randevu_durum_degistir' pk=randevu.pk yeni_durum='PLAN' %}"
-                            class="btn btn-info" title="Planlandı Durumuna Çek">
-                            <i class="fas fa-undo"></i>
-                        </a>
+                        {% else %}
+                        <small class="text-muted italic">- İlan Yok -</small>
                         {% endif %}
                     </div>
 
-                    {# Randevu düzenleme linki (Admin) #}
-                    <a href="/admin/ilanlar/randevu/{{ randevu.pk }}/change/"
-                        class="btn btn-sm btn-outline-secondary d-block mt-1">Düzenle</a>
+                    <div class="col-md-2 text-center">
+                        <div class="mb-2">
+                            {% if randevu.durum == 'TAMAM' %}
+                            <span class="badge bg-success w-100">{{ randevu.get_durum_display }}</span>
+                            {% elif randevu.durum == 'IPTAL' %}
+                            <span class="badge bg-danger w-100">{{ randevu.get_durum_display }}</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark w-100">{{ randevu.get_durum_display }}</span>
+                            {% endif %}
+                        </div>
 
-                    {% endwith %}
+                        <div class="btn-group btn-group-sm w-100">
+                            {% if randevu.durum != 'TAMAM' %}
+                            <a href="{% url 'randevu_durum_degistir' pk=randevu.pk yeni_durum='TAMAM' %}"
+                                class="btn btn-success" title="Tamamla"><i class="fas fa-check"></i></a>
+                            {% endif %}
+                            {% if randevu.durum != 'IPTAL' %}
+                            <a href="{% url 'randevu_durum_degistir' pk=randevu.pk yeni_durum='IPTAL' %}"
+                                class="btn btn-danger" title="İptal"><i class="fas fa-times"></i></a>
+                            {% endif %}
+                            <a href="/admin/ilanlar/randevu/{{ randevu.pk }}/change/" class="btn btn-outline-secondary"
+                                title="Düzenle"><i class="fas fa-edit"></i></a>
+                        </div>
+                    </div>
                 </div>
+                {% empty %}
+                <div class="list-group-item text-center py-5">
+                    <p class="text-muted mb-0">Henüz randevu kaydı bulunmamaktadır.</p>
+                </div>
+                {% endfor %}
             </div>
-            {% empty %}
-            <div class="list-group-item">
-                <p class="alert alert-info mb-0">Kayıtlı randevu bulunmamaktadır.</p>
-            </div>
-            {% endfor %}
         </div>
-
-        {# Paginasyon Eklenmeli (varsayılan listview için) #}
-
     </div>
 </div>
+
+{# --- VERİLERİ GÜVENLİ ŞEKİLDE JS'YE AKTAR --- #}
+{{ ilan_basliklari|json_script:"ilan-baslik-data" }}
+{{ ilan_randevu_sayilari|json_script:"ilan-sayi-data" }}
+
 {% endblock content %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    // Sayısal değerler için JSON.parse() kullanmak genellikle gereksizdir ve tırnak işareti eksikliği 
-    // nedeniyle hata verebilir. Doğrudan sayıyı alalım:
-    const planlanan = JSON.parse('{{ planlanan_sayisi_7gun }}');
-    const tamamlanan = JSON.parse('{{ tamamlanan_sayisi_7gun }}');
-    const iptalEdilen = JSON.parse('{{ iptal_edilen_sayisi_7gun }}');
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. GRAFİK: İLAN PERFORMANSI (Çubuk)
+        try {
+            const etiketler = JSON.parse(document.getElementById('ilan-baslik-data').textContent);
+            const veriler = JSON.parse(document.getElementById('ilan-sayi-data').textContent);
 
-    const data = {
-        labels: ['Planlanan', 'Tamamlanan', 'İptal Edilen'],
-        datasets: [{
-            data: [planlanan, tamamlanan, iptalEdilen],
-            backgroundColor: [
-                'rgb(54, 162, 235)', // Mavi
-                'rgb(75, 192, 192)', // Yeşil
-                'rgb(255, 99, 132)'  // Kırmızı
-            ],
-            hoverOffset: 4
-        }]
-    };
-
-    const config = {
-        type: 'pie', // Pasta grafiği
-        data: data,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' },
-                // Title, kart başlığında olduğu için kapatıldı.
-                title: { display: false }
+            if (etiketler.length > 0) {
+                new Chart(document.getElementById('ilanPerformansGrafigi'), {
+                    type: 'bar',
+                    data: {
+                        labels: etiketler,
+                        datasets: [{
+                            label: 'Tamamlanan Randevu',
+                            data: veriler,
+                            backgroundColor: 'rgba(102, 16, 242, 0.7)',
+                            borderColor: '#6610f2',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                    }
+                });
             }
-        }
-    };
+        } catch (e) { console.error("İlan grafiği yüklenemedi:", e); }
 
-    // Grafiği çizmek için gerekli komut
-    new Chart(
-        document.getElementById('randevuDurumGrafigi'),
-        config
-    );
+        // 2. GRAFİK: DURUM DAĞILIMI (Pasta)
+        const planlanan = Number("{{ planlanan_sayisi_7gun|default:0 }}");
+        const tamamlanan = Number("{{ tamamlanan_sayisi_7gun|default:0 }}");
+        const iptalEdilen = Number("{{ iptal_edilen_sayisi_7gun|default:0 }}");
+
+        if ((planlanan + tamamlanan + iptalEdilen) > 0) {
+            new Chart(document.getElementById('randevuDurumGrafigi'), {
+                type: 'pie',
+                data: {
+                    labels: ['Planlanan', 'Tamamlanan', 'İptal Edilen'],
+                    datasets: [{
+                        data: [planlanan, tamamlanan, iptalEdilen],
+                        backgroundColor: ['#36A2EB', '#4BC0C0', '#FF6384'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+    });
 </script>
 {% endblock extra_js %}

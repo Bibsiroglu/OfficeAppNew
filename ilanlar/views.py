@@ -11,6 +11,7 @@ from django.db import transaction
 from .models import Ajanda, Ilan, Randevu, PotansiyelMusteri # Yeni modelleri import edin
 from .forms import RandevuOlusturForm
 from django.utils import timezone
+from django.db.models import Count
 
 from ilanlar.models import Ilan 
 
@@ -179,25 +180,38 @@ class RandevuListView(ListView):
         context['toplam_randevu_sayisi'] = toplam_sayi
 
         queryset = self.get_queryset()
+
+        on_bes_gun_oncesi = timezone.now() - timedelta(days=15)
+        populer_ilanlar = Randevu.objects.filter(
+            durum='TAMAM',
+            ilan__isnull=False,
+            tarih_saat__gte=on_bes_gun_oncesi  # Filtreyi buraya ekledik
+        ).values('ilan__baslik').annotate(
+            toplam_randevu=Count('id')
+        ).order_by('-toplam_randevu')[:5]
+
+    # Listeleri hazırlayalım (JavaScript'e göndermek için)
+        context['ilan_basliklari'] = [item['ilan__baslik'] for item in populer_ilanlar]
+        context['ilan_randevu_sayilari'] = [item['toplam_randevu'] for item in populer_ilanlar]
+        grafik_queryset = Randevu.objects.filter(tarih_saat__gte=on_bes_gun_oncesi)
         context ['planlanan_sayisi'] = queryset.filter(durum='PLAN').count()
         context ['tamamlanan_sayisi'] = queryset.filter(durum='TAMAM').count()
         context ['iptal_edilen_sayisi'] = queryset.filter(durum='IPTAL').count()
 
-        # 2. Son 7 Gün Filtresi Tanımlama
-        yedi_gun_oncesi = timezone.now() - timedelta(days=7)
+        son_iki_hafta = timezone.now() - timedelta(days=15)
         
-        # Yalnızca son 7 güne ait randevuları içeren QuerySet
-        # 'tarih_saat__gte': tarih_saat alanı, 7 gün öncesinden büyük veya eşit olmalı.
-        grafik_queryset = Randevu.objects.filter(tarih_saat__gte=yedi_gun_oncesi)
+       
+        grafik_queryset = Randevu.objects.filter(tarih_saat__gte=son_iki_hafta)
         
-        # 3. Son 7 Günlük Sayımlar (Grafik için)
-        # Değişken isimlerine '_7gun' eki ekleyerek genel sayımlarla karışmasını önledik.
+
         
         context['toplam_randevu_sayisi_7gun'] = grafik_queryset.count()
-        
+    
         context['planlanan_sayisi_7gun'] = grafik_queryset.filter(durum='PLAN').count()
         context['tamamlanan_sayisi_7gun'] = grafik_queryset.filter(durum='TAMAM').count()
         context['iptal_edilen_sayisi_7gun'] = grafik_queryset.filter(durum='IPTAL').count()
+
+    
         
         # Toplam randevu sayısını sadece 7 günlük verilerden hesaplama (Eğer gerekirse)
         # Bu, grafik_queryset.count() ile zaten aynı sonucu verir.
