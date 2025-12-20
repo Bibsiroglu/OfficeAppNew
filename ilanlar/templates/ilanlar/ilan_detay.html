@@ -1,68 +1,170 @@
-<div class="bilgi-kutu">
-    <h2>👤 İlan Sahibi İletişim</h2>
-    <div class="bilgi-grid">
-        <div class="bilgi-satiri"><strong>Ad Soyad:</strong> <span>{{ ilan.musteri.ad }} {{ ilan.musteri.soyad }}</span>
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ ilan.ilan_no }} - {{ ilan.baslik }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'ilan_listesi' %}">İlanlar</a></li>
+                    <li class="breadcrumb-item active">{{ ilan.get_ana_kategori_display }}</li>
+                </ol>
+            </nav>
+            <h1 class="h2">{{ ilan.baslik }}</h1>
+            <p class="text-muted"><i class="fas fa-map-marker-alt"></i>
+                {{ ilan.il }} / {{ ilan.ilce }} / {{ ilan.mahalle }}
+            </p>
         </div>
-        <div class="bilgi-satiri"><strong>Telefon:</strong> <span>{{ ilan.musteri.telefon }}</span></div>
+        <div class="text-end">
+            <h2 class="text-primary">{{ ilan.fiyat_goster }}</h2>
+            <div>{{ ilan.durum_kontrol }}</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 py-1">Emlak Bilgileri</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th class="text-muted w-50">İlan No:</th>
+                                    <td>{{ ilan.ilan_no }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">İşlem Tipi:</th>
+                                    <td>{{ ilan.get_islem_tipi_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Mülk Tipi:</th>
+                                    <td>{{ ilan.get_detay_kategori_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Net / Brüt:</th>
+                                    <td>{{ ilan.net }} m² / {{ ilan.brut }} m²</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Oda Sayısı:</th>
+                                    <td>{{ ilan.get_oda_sayisi_display }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th class="text-muted w-50">Bina Yaşı:</th>
+                                    <td>{% if ilan.bina_yasi is not None %}{{ ilan.bina_yasi }}{% else %}-{% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Kat Sayısı:</th>
+                                    <td>{{ ilan.kat_sayisi|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Bulunduğu Kat:</th>
+                                    <td>{{ ilan.bulundugu_kat|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Isıtma:</th>
+                                    <td>{{ ilan.get_isitma_tipi_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Kullanım:</th>
+                                    <td>{{ ilan.get_kullanim_durumu_display }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6>Ek Özellikler</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span
+                            class="badge {% if ilan.balkon %}bg-success{% else %}bg-secondary{% endif %} p-2">Balkon</span>
+                        <span
+                            class="badge {% if ilan.asansor %}bg-success{% else %}bg-secondary{% endif %} p-2">Asansör</span>
+                        <span
+                            class="badge {% if ilan.esyali %}bg-success{% else %}bg-secondary{% endif %} p-2">Eşyalı</span>
+                        <span
+                            class="badge {% if ilan.krediye_uygun %}bg-success{% else %}bg-secondary{% endif %} p-2">Krediye
+                            Uygun</span>
+                        <span
+                            class="badge {% if ilan.takas %}bg-success{% else %}bg-secondary{% endif %} p-2">Takas</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5>Açıklama ve Adres</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Açık Adres:</h6>
+                    <p>{{ ilan.adres|linebreaks|default:"Adres detayı belirtilmemiş." }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-primary mb-4">
+                <div class="card-body">
+                    <h6 class="card-title text-primary"><i class="fas fa-user-tie"></i> İlan Sahibi (Müşteri)</h6>
+                    {% if ilan.musteri %}
+                    <p class="mb-1"><strong>{{ ilan.musteri.ad }} {{ ilan.musteri.soyad }}</strong></p>
+                    <p class="mb-0 text-muted small"><i class="fas fa-phone"></i> {{ ilan.musteri.telefon }}</p>
+                    {% else %}
+                    <p class="text-muted mb-0">Sahibi belirtilmemiş.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <span>Randevular</span>
+                    <span class="badge bg-light text-dark">{{ toplam_randevu_sayisi }}</span>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for randevu in ilgili_randevular %}
+                    <li class="list-group-item">
+                        <div class="small fw-bold">{{ randevu.tarih_saat|date:"d M Y - H:i" }}</div>
+                        <div class="small">{{ randevu.potansiyel_musteri.ad }} {{ randevu.potansiyel_musteri.soyad }}
+                        </div>
+                        <span class="badge bg-info mt-1">{{ randevu.get_durum_display }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted small text-center py-3">Bu ilan için randevu yok.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5>İlgilenenler</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for lead in ilan.leads.all %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small">{{ lead.ad }} {{ lead.soyad }}</span>
+                                <a href="tel:{{ lead.telefon }}" class="btn btn-sm btn-outline-success border-0">
+                                    <i class="fas fa-phone"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="p-3 text-muted small text-center">Henüz potansiyel müşteri yok.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
-<div class="bilgi-kutu">
-    <h2>💰 Fiyat ve Durum</h2>
-    <p><strong>Fiyat:</strong> <span class="fiyat">{{ ilan.fiyat_goster }}</span></p>
-    <p><strong>Net/Brüt Oranı:</strong> {{ ilan.net_alan_orani }}</p>
-    <p><strong>Durum:</strong> {{ ilan.durum_kontrol }}</p>
-</div>
-
-<div class="bilgi-kutu">
-    <h2>📐 Fiziksel Özellikler</h2>
-    <p><strong>Oda Sayısı:</strong> {{ ilan.oda_sayisi }}</p>
-    <p><strong>İmar Durumu:</strong> {{ ilan.get_imar_durumu_display }}</p>
-    <p><strong>Mutfak Tipi:</strong> {{ ilan.get_mutfak_tipi_display }}</p>
-</div>
-
-<hr>
-
-{# BAŞLIK: Toplam Sayı Gösterimi #}
-<h2>📅 İlana Özel Randevu Geçmişi (Toplam: {{ toplam_randevu_sayisi }} Adet)</h2>
-
-{% if ilgili_randevular %}
-<div class="table-responsive">
-    <table class="table table-hover table-striped table-sm border">
-        <thead class="table-dark">
-            <tr>
-                <th>Randevu Tarihi</th>
-                <th>Müşteri Adı Soyadı</th>
-                <th>Telefon</th>
-                <th>Durum / Sonuç</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for randevu in ilgili_randevular %}
-            <tr>
-                {# 1. Randevu Tarihi #}
-                <td>{{ randevu.tarih_saat|date:"d.m.Y H:i" }}</td>
-
-                {% with pm=randevu.potansiyel_musteri %}
-                <td>{{ pm.ad }} {{ pm.soyad }}</td>
-                <td>{{ pm.telefon }}</td>
-                {% endwith %}
-
-                {# 4. Durum / Sonuç #}
-                <td>
-                    {% if randevu.durum == 'TAMAM' %}
-                    <span class="badge bg-success">{{ randevu.get_durum_display }}</span>
-                    {% elif randevu.durum == 'IPTAL' %}
-                    <span class="badge bg-danger">{{ randevu.get_durum_display }}</span>
-                    {% else %}
-                    <span class="badge bg-warning text-dark">{{ randevu.get_durum_display }}</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% else %}
-<p class="alert alert-info">Bu ilana ait henüz bir randevu planlanmamıştır.</p>
-{% endif %}
+{% endblock %}
