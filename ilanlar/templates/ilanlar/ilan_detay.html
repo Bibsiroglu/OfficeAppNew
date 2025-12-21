@@ -34,79 +34,65 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <table class="table table-sm table-borderless">
-                                <tr>
-                                    <th class="text-muted w-50">İlan No:</th>
-                                    <td>{{ ilan.ilan_no }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">İşlem Tipi:</th>
-                                    <td>{{ ilan.get_islem_tipi_display }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Mülk Tipi:</th>
-                                    <td>{{ ilan.get_detay_kategori_display }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Net / Brüt:</th>
-                                    <td>{{ ilan.net }} m² / {{ ilan.brut }} m²</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Oda Sayısı:</th>
-                                    <td>{{ ilan.get_oda_sayisi_display }}</td>
-                                </tr>
+                                <tr><th class="text-muted w-50">İlan No:</th><td>{{ ilan.ilan_no }}</td></tr>
+                                <tr><th class="text-muted">İşlem Tipi:</th><td>{{ ilan.get_islem_tipi_display }}</td></tr>
+                                <tr><th class="text-muted">Mülk Tipi:</th><td>{{ ilan.get_detay_kategori_display }}</td></tr>
+                                <tr><th class="text-muted">Net / Brüt:</th><td>{{ ilan.net }} m² / {{ ilan.brut }} m²</td></tr>
+                                <tr><th class="text-muted">Oda Sayısı:</th><td>{{ ilan.get_oda_sayisi_display }}</td></tr>
                             </table>
                         </div>
                         <div class="col-md-6">
                             <table class="table table-sm table-borderless">
                                 <tr>
                                     <th class="text-muted w-50">Bina Yaşı:</th>
-                                    <td>{% if ilan.bina_yasi is not None %}{{ ilan.bina_yasi }}{% else %}-{% endif %}
-                                    </td>
+                                    <td>{% if ilan.bina_yasi is not None %}{{ ilan.bina_yasi }}{% else %}-{% endif %}</td>
                                 </tr>
-                                <tr>
-                                    <th class="text-muted">Kat Sayısı:</th>
-                                    <td>{{ ilan.kat_sayisi|default:"-" }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Bulunduğu Kat:</th>
-                                    <td>{{ ilan.bulundugu_kat|default:"-" }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Isıtma:</th>
-                                    <td>{{ ilan.get_isitma_tipi_display }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Kullanım:</th>
-                                    <td>{{ ilan.get_kullanim_durumu_display }}</td>
-                                </tr>
+                                <tr><th class="text-muted">Kat Sayısı:</th><td>{{ ilan.kat_sayisi|default:"-" }}</td></tr>
+                                <tr><th class="text-muted">Bulunduğu Kat:</th><td>{{ ilan.bulundugu_kat|default:"-" }}</td></tr>
+                                <tr><th class="text-muted">Isıtma:</th><td>{{ ilan.get_isitma_tipi_display }}</td></tr>
+                                <tr><th class="text-muted">Kullanım:</th><td>{{ ilan.get_kullanim_durumu_display }}</td></tr>
                             </table>
                         </div>
                     </div>
                     <hr>
                     <h6>Ek Özellikler</h6>
                     <div class="d-flex flex-wrap gap-2">
-                        <span
-                            class="badge {% if ilan.balkon %}bg-success{% else %}bg-secondary{% endif %} p-2">Balkon</span>
-                        <span
-                            class="badge {% if ilan.asansor %}bg-success{% else %}bg-secondary{% endif %} p-2">Asansör</span>
-                        <span
-                            class="badge {% if ilan.esyali %}bg-success{% else %}bg-secondary{% endif %} p-2">Eşyalı</span>
-                        <span
-                            class="badge {% if ilan.krediye_uygun %}bg-success{% else %}bg-secondary{% endif %} p-2">Krediye
-                            Uygun</span>
-                        <span
-                            class="badge {% if ilan.takas %}bg-success{% else %}bg-secondary{% endif %} p-2">Takas</span>
+                        <span class="badge {% if ilan.balkon %}bg-success{% else %}bg-secondary{% endif %} p-2">Balkon</span>
+                        <span class="badge {% if ilan.asansor %}bg-success{% else %}bg-secondary{% endif %} p-2">Asansör</span>
+                        <span class="badge {% if ilan.esyali %}bg-success{% else %}bg-secondary{% endif %} p-2">Eşyalı</span>
+                        <span class="badge {% if ilan.krediye_uygun %}bg-success{% else %}bg-secondary{% endif %} p-2">Krediye Uygun</span>
+                        <span class="badge {% if ilan.takas %}bg-success{% else %}bg-secondary{% endif %} p-2">Takas</span>
                     </div>
                 </div>
             </div>
 
             <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5>Açıklama ve Adres</h5>
-                </div>
+                <div class="card-header bg-white"><h5>Açıklama ve Adres</h5></div>
                 <div class="card-body">
                     <h6>Açık Adres:</h6>
                     <p>{{ ilan.adres|linebreaks|default:"Adres detayı belirtilmemiş." }}</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden; background: #f8fbff;">
+                <div class="card-header d-flex align-items-center justify-content-between py-3" style="background: #1a237e; color: white;">
+                    <h5 class="mb-0"><i class="fas fa-robot me-2 text-warning"></i> AI Gayrimenkul Analiz Raporu</h5>
+                    <span class="badge bg-light text-dark">Gemini AI Uzman Görüşü</span>
+                </div>
+                <div class="card-body">
+                    <div class="ai-analysis-text">
+                        {% if ai_analiz_raporu %}
+                            {{ ai_analiz_raporu|safe }}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="mt-2 text-muted italic">Yapay zeka verileri işliyor, uzman raporu oluşturuluyor...</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-white text-muted small border-0">
+                    <i class="fas fa-info-circle me-1"></i> Bu rapor fiyat, konum ve mülk özelliklerine dayanarak üretilen bir öngörüdür.
                 </div>
             </div>
         </div>
@@ -116,10 +102,10 @@
                 <div class="card-body">
                     <h6 class="card-title text-primary"><i class="fas fa-user-tie"></i> İlan Sahibi (Müşteri)</h6>
                     {% if ilan.musteri %}
-                    <p class="mb-1"><strong>{{ ilan.musteri.ad }} {{ ilan.musteri.soyad }}</strong></p>
-                    <p class="mb-0 text-muted small"><i class="fas fa-phone"></i> {{ ilan.musteri.telefon }}</p>
+                        <p class="mb-1"><strong>{{ ilan.musteri.ad }} {{ ilan.musteri.soyad }}</strong></p>
+                        <p class="mb-0 text-muted small"><i class="fas fa-phone"></i> {{ ilan.musteri.telefon }}</p>
                     {% else %}
-                    <p class="text-muted mb-0">Sahibi belirtilmemiş.</p>
+                        <p class="text-muted mb-0">Sahibi belirtilmemiş.</p>
                     {% endif %}
                 </div>
             </div>
@@ -133,8 +119,7 @@
                     {% for randevu in ilgili_randevular %}
                     <li class="list-group-item">
                         <div class="small fw-bold">{{ randevu.tarih_saat|date:"d M Y - H:i" }}</div>
-                        <div class="small">{{ randevu.potansiyel_musteri.ad }} {{ randevu.potansiyel_musteri.soyad }}
-                        </div>
+                        <div class="small">{{ randevu.potansiyel_musteri.ad }} {{ randevu.potansiyel_musteri.soyad }}</div>
                         <span class="badge bg-info mt-1">{{ randevu.get_durum_display }}</span>
                     </li>
                     {% empty %}
@@ -144,9 +129,7 @@
             </div>
 
             <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5>İlgilenenler</h5>
-                </div>
+                <div class="card-header bg-white"><h5>İlgilenenler</h5></div>
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush">
                         {% for lead in ilan.leads.all %}
@@ -167,4 +150,22 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* AI Analiz metni için küçük görsel iyileştirmeler */
+    .ai-analysis-text h5 {
+        color: #1a237e;
+        font-size: 1.1rem;
+        margin-top: 1.2rem;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 5px;
+    }
+    .ai-analysis-text ul {
+        padding-left: 1.2rem;
+    }
+    .ai-analysis-text li {
+        margin-bottom: 8px;
+        color: #333;
+    }
+</style>
 {% endblock %}

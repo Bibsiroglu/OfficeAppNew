@@ -1,11 +1,11 @@
 from datetime import date, timedelta
 from itertools import count
+
 from django.shortcuts import get_object_or_404, render
 from django.contrib import messages
 from django.views.generic import ListView, CreateView 
 from django.urls import reverse_lazy
-from numpy import convolve
-from sqlalchemy import Transaction
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import transaction
 from .models import Ajanda, Ilan, Randevu, PotansiyelMusteri # Yeni modelleri import edin
@@ -120,48 +120,72 @@ class IlanCreateView(CreateView):
 def ilan_detay(request, pk):
     ilan = get_object_or_404(Ilan, pk=pk)
     
-    # 1. Randevuların tamamını çekme (tercihen sıralı)
-    # Varsayım: Randevu modelinde ilan Foreign Key'inin related_name'i 'randevular'dır.
+    # 1. Mevcut Verileri Çekme
     ilgili_randevular = ilan.randevular.all().order_by('-tarih_saat')
-    
-    # 2. Sayıyı hesaplama
+    leads = ilan.leads.all()
     toplam_randevu_sayisi = ilgili_randevular.count()
+    ai_analiz_raporu = ""
 
+    # 2. AI ANALİZ SİSTEMİ (Sadece Sayfa İlk Açıldığında veya GET isteğinde)
+    if request.method == 'GET':
+        try:
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+
+            # Model ismini 1.5-flash olarak sabitledik (en stabil versiyon)
+            model = genai.GenerativeModel('models/gemini-2.5-flash')
+            
+            prompt = f"""
+            Bir gayrimenkul yatırım uzmanı olarak şu ilanı analiz et:
+            Başlık: {ilan.baslik}
+            Konum: {ilan.il}/{ilan.ilce}/{ilan.mahalle}
+            Fiyat: {ilan.fiyat} TL
+            Özellikler: {ilan.net}m2, {ilan.oda_sayisi} oda, Yaş: {ilan.bina_yasi}, Kat: {ilan.bulundugu_kat}
+            Ekstralar: Site: {ilan.site_icerisinde}, Otopark: {ilan.otopark_durumu}, Isınma: {ilan.get_isitma_tipi_display}
+
+            Lütfen şu formatta profesyonel bir HTML yanıt ver:
+            <h5><i class='fas fa-search-dollar'></i> Fiyat Analizi</h5><p>Analiz...</p>
+            <h5><i class='fas fa-chart-line'></i> Yatırım Potansiyeli</h5><p>Analiz...</p>
+            <h5><i class='fas fa-bullseye'></i> Hedef Kitle ve Strateji</h5><p>Analiz...</p>
+            """
+            response = model.generate_content(prompt)
+            ai_analiz_raporu = response.text.replace("```html", "").replace("```", "")
+        except Exception as e:
+            
+            ai_analiz_raporu = f"<p class='text-muted small'>Analiz şu an oluşturulamadı.</p>"
+
+    # 3. RANDEVU FORMU İŞLEME (POST METODU)
+    form = RandevuOlusturForm() # Varsayılan boş form
     if request.method == 'POST':
         form = RandevuOlusturForm(request.POST)
-            
         if form.is_valid():
-            with Transaction.atomic():
-                
-                # --- 1. RANDEVUYU KAYDET ---
+            with transaction.atomic():
                 randevu = form.save(commit=False)
                 randevu.ilan = ilan
                 randevu.durum = 'PLAN'
                 randevu.save()
                 
+                # Potansiyel Müşteri Güncelleme/Oluşturma
                 potansiyel_musteri_objesi = randevu.potansiyel_musteri
-
                 PotansiyelMusteri.objects.update_or_create(
                     telefon=potansiyel_musteri_objesi.telefon, 
                     defaults={
-                    'ad': potansiyel_musteri_objesi.ad,
-                    'soyad': potansiyel_musteri_objesi.soyad,
-                    'ilgili_ilan': ilan 
+                        'ad': potansiyel_musteri_objesi.ad,
+                        'soyad': potansiyel_musteri_objesi.soyad,
+                        'ilgili_ilan': ilan 
                     }
                 )
-                
-            # Başarılı kayıttan sonra ilan detayına geri yönlendir
-            return redirect('ilan_detay', pk=ilan.pk) 
-    else:
-        form = RandevuOlusturForm()
-    
+            messages.success(request, "Randevu başarıyla oluşturuldu.")
+            return redirect('ilan_detay', pk=ilan.pk)
+
+    # 4. TEK BİR CONTEXT VE RENDER
     context = {
         'ilan': ilan,
-        'ilgili_randevular': ilgili_randevular, # Liste
+        'ilgili_randevular': ilgili_randevular,
+        'leads': leads,
+        'ai_analiz_raporu': ai_analiz_raporu,
+        'toplam_randevu_sayisi': toplam_randevu_sayisi,
         'randevu_form': form,
-        'toplam_randevu_sayisi': toplam_randevu_sayisi, # Sayı
     }
-    
     return render(request, 'ilanlar/ilan_detay.html', context)
 
 class RandevuListView(ListView):
